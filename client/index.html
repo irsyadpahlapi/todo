@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="assets/css/foundation.css" />
+    <link rel="stylesheet" href="assets/css/foundation-icons.css" />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script src="assets/js/vendor/modernizr.js"></script>
+    <script src="https://unpkg.com/vue@2.5.16/dist/vue.js"></script>
+    <style media="screen">
+    .reveal-modal .close-reveal-modal{
+      right:0px;
+      top:0px;
+      position:relative;
+      font-size:15px;
+      color:white;
+    }
+    </style>
+  </head>
+
+  <body>
+    <div class="" id="app">
+      <todos @tambahtodo='addtodo'></todos>
+      <div class="off-canvas-wrap" data-offcanvas>
+        <div class="inner-wrap">
+          <nav class="tab-bar">
+            <section class="left-small">
+              <a class="left-off-canvas-toggle menu-icon" ><span></span></a>
+            </section>
+
+            <section class="middle tab-bar-section">
+              <h1> <i class="fi-star"></i> {{message}} <i class="fi-star"></i></h1>
+            </section>
+
+          </nav>
+
+          <aside class="left-off-canvas-menu">
+            <ul class="off-canvas-list">
+              <li><label id="namaku"></label></li>
+              <li><a href="#" data-reveal-id="firstModal">Add Todos</a></li>
+              <li><a onclick="logouts()" class="close-reveal-modal" aria-label="Close"><img :src="imgfb" alt="" style="width:15%; margin-right:10px;">Log Out <span class='fi-arrow-right' style="vertical-align:middle;"></span> </a></li>
+            </ul>
+          </aside>
+          <section class="main-section">
+            <ul class="example-orbit-content" data-orbit>
+              <li data-orbit-slide="headline-1">
+                <img src="assets/img/header.jpg" alt="slide 1" style="width:100%"/>
+                  <div class="orbit-caption">
+                    Digital Marketing
+                  </div>
+              </li>
+              <li data-orbit-slide="headline-2">
+                <div>
+                  <img src="assets/img/header.jpg" alt="slide 1" style="width:100%"/>
+                  <div class="orbit-caption">
+                    Digital Marketing 2
+                  </div>
+                </div>
+              </li>
+            </ul>
+            <hr style="margin-left:20px; margin-right:20px;">
+            <div class="panel small-12 large-12 columns">
+              <div class="small-12 large-3 columns" v-for="item in items">
+                <items :item="item" @deletetodo='deletetodo' @finishtodo='finish'></items>
+              </div>
+
+            <div id="additems" class="reveal-modal" data-reveal aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
+              <form class="" method="post">
+                <div class="row">
+                  <div class="large-12 columns">
+                    <div class="row collapse">
+                      <div class="small-10 columns">
+                        <input type="text" placeholder="Input Title">
+                      </div>
+                      <div class="small-2 columns">
+                        <a href="#" class="button postfix">Go</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          </section>
+        <a class="exit-off-canvas"></a>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/vendor/jquery/jquery.min.js"></script>
+    <script src="assets/js/vendor/jquery.js"></script>
+    <script src="assets/js/foundation.min.js"></script>
+    <script src="assets/js/listcomponent.js"></script>
+    <script src="assets/js/addtodoscomponent.js"></script>
+    <script src="assets/js/script.js"></script>
+    <script type="text/javascript">
+      if(localStorage.token===undefined){
+        $(window).attr('location', 'login.html')
+      }
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '592784331071735',
+          cookie     : true,
+          xfbml      : true,
+          version    : 'v2.12'
+        });
+        FB.AppEvents.logPageView();
+        FB.getLoginStatus(function(response) {
+          statusChangeCallback(response);
+        });
+      };
+
+      (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = 'https://connect.facebook.net/id_ID/sdk.js#xfbml=1&version=v2.12&appId=592784331071735&autoLogAppEvents=1';
+        fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));
+
+       function checkLoginState() {
+         FB.getLoginStatus(function(response) {
+           statusChangeCallback(response);
+         });
+       }
+
+       function statusChangeCallback(response){
+         if(response.status === 'connected'){
+           sendTokenToServer(localStorage.token);
+         }else{
+           location.reload();
+           console.log('not connected');
+         }
+       }
+
+       function sendTokenToServer(token) {
+         $.ajax({
+           type: 'GET',
+           url: 'http://localhost:3000/testjwt/',
+           headers: {
+             token: token,
+             tokenfb: localStorage.tokenfb
+           },
+           success: function(resp) {
+             $('#namaku').html(resp.name)
+           },
+           error: function(error) {
+             console.error('Failed send to server');
+             console.log(error);
+           }
+         })
+       };
+
+       function logouts(){
+         window.FB.logout(function(response) {
+           localStorage.removeItem("token")
+           localStorage.removeItem("tokenfb")
+           statusChangeCallback(response)
+           window.location.href = '/'
+         });
+       }
+
+    </script>
+    <script>
+      $(document).foundation();
+    </script>
+  </body>
+</html>
